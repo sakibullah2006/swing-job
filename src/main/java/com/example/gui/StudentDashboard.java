@@ -144,9 +144,16 @@ public class StudentDashboard extends JPanel {
         // Clear and repopulate job list
         jobsListPanel.removeAll();
         
-        for (Job job : jobs) {
-            JPanel jobPanel = createJobItemPanel(job);
-            jobsListPanel.add(jobPanel);
+        if (jobs.isEmpty()) {
+            JLabel emptyLabel = new JLabel("No jobs found. Try adjusting your search filters.");
+            emptyLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+            emptyLabel.setForeground(Color.GRAY);
+            jobsListPanel.add(emptyLabel);
+        } else {
+            for (Job job : jobs) {
+                JPanel jobPanel = createJobItemPanel(job);
+                jobsListPanel.add(jobPanel);
+            }
         }
         
         jobsListPanel.revalidate();

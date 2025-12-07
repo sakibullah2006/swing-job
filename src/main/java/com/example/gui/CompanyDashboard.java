@@ -259,14 +259,6 @@ public class CompanyDashboard extends JPanel {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
         
-        JScrollPane scrollPane = new JScrollPane();
-        JPanel jobsListPanel = new JPanel();
-        jobsListPanel.setLayout(new BoxLayout(jobsListPanel, BoxLayout.Y_AXIS));
-        jobsListPanel.setBackground(Color.WHITE);
-        
-        scrollPane.setViewportView(jobsListPanel);
-        panel.add(scrollPane, BorderLayout.CENTER);
-        
         // Refresh button
         JButton refreshButton = new JButton("Refresh");
         refreshButton.addActionListener(new ActionListener() {
@@ -302,7 +294,10 @@ public class CompanyDashboard extends JPanel {
         jobsListPanel.removeAll();
         
         if (jobs.isEmpty()) {
-            jobsListPanel.add(new JLabel("You haven't posted any jobs yet."));
+            JLabel emptyLabel = new JLabel("You haven't posted any jobs yet. Click the 'Post Job' tab to get started!");
+            emptyLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+            emptyLabel.setForeground(Color.GRAY);
+            jobsListPanel.add(emptyLabel);
         } else {
             for (Job job : jobs) {
                 JPanel jobPanel = createJobItemPanel(job);
@@ -357,28 +352,35 @@ public class CompanyDashboard extends JPanel {
         JPanel appListPanel = new JPanel();
         appListPanel.setLayout(new BoxLayout(appListPanel, BoxLayout.Y_AXIS));
         
-        for (Application app : applications) {
-            JPanel appPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            appPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-            appPanel.add(new JLabel("Student ID: " + app.getStudentId() + " | Status: " + app.getStatus() + " | Applied: " + app.getAppliedAt()));
-            
-            String[] statuses = {"PENDING", "REVIEWED", "INTERVIEW", "REJECTED", "ACCEPTED"};
-            JComboBox<String> statusCombo = new JComboBox<>(statuses);
-            statusCombo.setSelectedItem(app.getStatus().toString());
-            appPanel.add(statusCombo);
-            
-            JButton updateButton = new JButton("Update");
-            updateButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    applicationService.updateApplicationStatus(app.getApplicationId(), 
-                        Application.ApplicationStatus.valueOf((String) statusCombo.getSelectedItem()));
-                    JOptionPane.showMessageDialog(dialog, "Status updated successfully!");
-                }
-            });
-            appPanel.add(updateButton);
-            
-            appListPanel.add(appPanel);
+        if (applications.isEmpty()) {
+            JLabel emptyLabel = new JLabel("No applications yet for this job.");
+            emptyLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+            emptyLabel.setForeground(Color.GRAY);
+            appListPanel.add(emptyLabel);
+        } else {
+            for (Application app : applications) {
+                JPanel appPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                appPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+                appPanel.add(new JLabel("Student ID: " + app.getStudentId() + " | Status: " + app.getStatus() + " | Applied: " + app.getAppliedAt()));
+                
+                String[] statuses = {"PENDING", "REVIEWED", "INTERVIEW", "REJECTED", "ACCEPTED"};
+                JComboBox<String> statusCombo = new JComboBox<>(statuses);
+                statusCombo.setSelectedItem(app.getStatus().toString());
+                appPanel.add(statusCombo);
+                
+                JButton updateButton = new JButton("Update");
+                updateButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        applicationService.updateApplicationStatus(app.getApplicationId(), 
+                            Application.ApplicationStatus.valueOf((String) statusCombo.getSelectedItem()));
+                        JOptionPane.showMessageDialog(dialog, "Status updated successfully!");
+                    }
+                });
+                appPanel.add(updateButton);
+                
+                appListPanel.add(appPanel);
+            }
         }
         
         scrollPane.setViewportView(appListPanel);
