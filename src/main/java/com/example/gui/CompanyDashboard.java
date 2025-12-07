@@ -23,6 +23,8 @@ public class CompanyDashboard extends JPanel {
     private ApplicationService applicationService;
     private JTabbedPane tabbedPane;
     private JComponent myJobsPanel;
+    private JPanel jobsListPanel;
+    private JScrollPane jobsScrollPane;
     
     public CompanyDashboard(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -67,6 +69,9 @@ public class CompanyDashboard extends JPanel {
         tabbedPane.addTab("My Jobs", myJobsPanel);
         
         add(tabbedPane, BorderLayout.CENTER);
+        
+        // Load jobs list after UI is fully initialized
+        SwingUtilities.invokeLater(() -> refreshMyJobs());
     }
     
     private JComponent createPostJobPanel() {
@@ -274,17 +279,26 @@ public class CompanyDashboard extends JPanel {
         buttonPanel.add(refreshButton);
         panel.add(buttonPanel, BorderLayout.NORTH);
         
-        refreshMyJobs();
+        // Jobs list
+        jobsScrollPane = new JScrollPane();
+        jobsListPanel = new JPanel();
+        jobsListPanel.setLayout(new BoxLayout(jobsListPanel, BoxLayout.Y_AXIS));
+        jobsListPanel.setBackground(Color.WHITE);
+        jobsScrollPane.setViewportView(jobsListPanel);
+        
+        panel.add(jobsScrollPane, BorderLayout.CENTER);
         
         return panel;
     }
     
     private void refreshMyJobs() {
+        // Guard against null panel (in case called before initialization)
+        if (jobsListPanel == null) {
+            return;
+        }
+        
         List<Job> jobs = jobService.getJobsByCompanyId(SessionManager.getInstance().getCurrentUserId());
         
-        JPanel panel = (JPanel) myJobsPanel;
-        JScrollPane scrollPane = (JScrollPane) panel.getComponent(1);
-        JPanel jobsListPanel = (JPanel) scrollPane.getViewport().getView();
         jobsListPanel.removeAll();
         
         if (jobs.isEmpty()) {

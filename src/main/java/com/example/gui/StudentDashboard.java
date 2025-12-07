@@ -24,6 +24,8 @@ public class StudentDashboard extends JPanel {
     private JTabbedPane tabbedPane;
     private JPanel jobSearchPanel;
     private JPanel applicationTrackerPanel;
+    private JPanel jobsListPanel;
+    private JScrollPane jobsScrollPane;
     
     public StudentDashboard(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -68,6 +70,9 @@ public class StudentDashboard extends JPanel {
         tabbedPane.addTab("My Applications", applicationTrackerPanel);
         
         add(tabbedPane, BorderLayout.CENTER);
+        
+        // Load job list after UI is fully initialized
+        SwingUtilities.invokeLater(() -> refreshJobList("", ""));
     }
     
     private JPanel createJobSearchPanel() {
@@ -111,21 +116,23 @@ public class StudentDashboard extends JPanel {
         panel.add(searchPanel, BorderLayout.NORTH);
         
         // Jobs list
-        JScrollPane scrollPane = new JScrollPane();
-        JPanel jobsListPanel = new JPanel();
+        jobsScrollPane = new JScrollPane();
+        jobsListPanel = new JPanel();
         jobsListPanel.setLayout(new BoxLayout(jobsListPanel, BoxLayout.Y_AXIS));
         jobsListPanel.setBackground(Color.WHITE);
-        scrollPane.setViewportView(jobsListPanel);
+        jobsScrollPane.setViewportView(jobsListPanel);
         
-        panel.add(scrollPane, BorderLayout.CENTER);
-        
-        // Initial load
-        refreshJobList("", "");
+        panel.add(jobsScrollPane, BorderLayout.CENTER);
         
         return panel;
     }
     
     private void refreshJobList(String location, String jobType) {
+        // Guard against null panel (in case called before initialization)
+        if (jobsListPanel == null) {
+            return;
+        }
+        
         List<Job> jobs;
         if (location.isEmpty() && jobType.isEmpty()) {
             jobs = jobService.getAllActiveJobs();
@@ -135,8 +142,6 @@ public class StudentDashboard extends JPanel {
         }
         
         // Clear and repopulate job list
-        JScrollPane scrollPane = (JScrollPane) ((JPanel) tabbedPane.getComponentAt(0)).getComponent(1);
-        JPanel jobsListPanel = (JPanel) scrollPane.getViewport().getView();
         jobsListPanel.removeAll();
         
         for (Job job : jobs) {

@@ -74,12 +74,16 @@ public class MainFrame extends JFrame {
      * Switch the current panel displayed in the frame.
      */
     private void switchPanel(JPanel newPanel) {
-        if (currentPanel != null) {
-            remove(currentPanel);
-        }
+        // Remove current panel from frame
+        getContentPane().removeAll();
+        
+        // Set new panel as content pane
+        setContentPane(newPanel);
+        
+        // Refresh display
+        getContentPane().revalidate();
+        getContentPane().repaint();
+        
         currentPanel = newPanel;
-        add(newPanel);
-        revalidate();
-        repaint();
     }
 }
